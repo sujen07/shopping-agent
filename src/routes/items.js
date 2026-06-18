@@ -3,6 +3,49 @@ const db = require('../db');
 
 const router = express.Router();
 
+function validateItemFields(body) {
+  const { title, desired_features, price_range_min, price_range_max, image_url } =
+    body;
+
+  if (!title || typeof title !== 'string' || !title.trim()) {
+    return { error: 'title is required' };
+  }
+
+  const parsePrice = (value, field) => {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+      return { error: `${field} must be a number` };
+    }
+    return value;
+  };
+
+  const min = parsePrice(price_range_min, 'price_range_min');
+  if (min && typeof min === 'object') {
+    return min;
+  }
+
+  const max = parsePrice(price_range_max, 'price_range_max');
+  if (max && typeof max === 'object') {
+    return max;
+  }
+
+  if (min !== null && max !== null && min > max) {
+    return {
+      error: 'price_range_min must be less than or equal to price_range_max',
+    };
+  }
+
+  return {
+    title: title.trim(),
+    desired_features: desired_features ?? null,
+    price_range_min: min,
+    price_range_max: max,
+    image_url: image_url ?? null,
+  };
+}
+
 router.get('/', (req, res) => {
   const items = db
     .prepare('SELECT * FROM items ORDER BY created_at DESC')
@@ -23,11 +66,9 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { title, desired_features, price_range_min, price_range_max, image_url } =
-    req.body;
-
-  if (!title || typeof title !== 'string' || !title.trim()) {
-    return res.status(400).json({ error: 'title is required' });
+  const fields = validateItemFields(req.body);
+  if (fields.error) {
+    return res.status(400).json({ error: fields.error });
   }
 
   const result = db
@@ -36,11 +77,11 @@ router.post('/', (req, res) => {
        VALUES (?, ?, ?, ?, ?)`
     )
     .run(
-      title.trim(),
-      desired_features ?? null,
-      price_range_min ?? null,
-      price_range_max ?? null,
-      image_url ?? null
+      fields.title,
+      fields.desired_features,
+      fields.price_range_min,
+      fields.price_range_max,
+      fields.image_url
     );
 
   const item = db
@@ -59,11 +100,9 @@ router.put('/:id', (req, res) => {
     return res.status(404).json({ error: 'Item not found' });
   }
 
-  const { title, desired_features, price_range_min, price_range_max, image_url } =
-    req.body;
-
-  if (!title || typeof title !== 'string' || !title.trim()) {
-    return res.status(400).json({ error: 'title is required' });
+  const fields = validateItemFields(req.body);
+  if (fields.error) {
+    return res.status(400).json({ error: fields.error });
   }
 
   db.prepare(
@@ -72,11 +111,11 @@ router.put('/:id', (req, res) => {
          image_url = ?, updated_at = datetime('now')
      WHERE id = ?`
   ).run(
-    title.trim(),
-    desired_features ?? null,
-    price_range_min ?? null,
-    price_range_max ?? null,
-    image_url ?? null,
+    fields.title,
+    fields.desired_features,
+    fields.price_range_min,
+    fields.price_range_max,
+    fields.image_url,
     req.params.id
   );
 

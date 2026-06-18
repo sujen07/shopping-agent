@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 const dataDir = path.join(__dirname, '..', 'data');
-const dbPath = path.join(dataDir, 'wishlist.db');
+const dbPath = process.env.DB_PATH || path.join(dataDir, 'wishlist.db');
 
-if (!fs.existsSync(dataDir)) {
+if (dbPath !== ':memory:' && !fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
