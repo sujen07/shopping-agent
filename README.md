@@ -8,7 +8,7 @@ A Node.js/Express backend with a local SQLite database for managing wishlist ite
 npm install && npm start
 ```
 
-The server starts at `http://localhost:3000` and creates the SQLite database at `data/wishlist.db` on first run.
+The server starts at `http://localhost:3000` and creates the SQLite database at `data/wishlist.db` on first run. Open that URL in a browser to use the wishlist UI.
 
 ## API
 

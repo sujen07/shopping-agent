@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wishlist</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="header__title">Wishlist</h1>
+      <button type="button" class="btn btn--primary" id="add-btn">Add item</button>
+    </header>
+
+    <main class="main">
+      <div class="empty-state" id="empty-state" hidden>
+        <p class="empty-state__text">Your wishlist is empty.</p>
+        <button type="button" class="btn btn--primary" id="empty-add-btn">
+          Add your first item
+        </button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </main>
+
+    <div class="modal-overlay" id="modal-overlay" hidden>
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <h2 class="modal__title" id="modal-title">Add item</h2>
+        <form class="modal__form" id="item-form">
+          <p class="form-error" id="form-error" hidden></p>
+
+          <div class="form-field">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required />
+          </div>
+
+          <div class="form-field">
+            <label for="desired_features">Desired features</label>
+            <textarea
+              id="desired_features"
+              name="desired_features"
+              rows="3"
+              placeholder="e.g. noise cancelling, long battery life"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="price_range_min">Min price</label>
+              <input
+                type="number"
+                id="price_range_min"
+                name="price_range_min"
+                min="0"
+                step="0.01"
+                placeholder="0"
+              />
+            </div>
+            <div class="form-field">
+              <label for="price_range_max">Max price</label>
+              <input
+                type="number"
+                id="price_range_max"
+                name="price_range_max"
+                min="0"
+                step="0.01"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="image_url">Image URL</label>
+            <input
+              type="url"
+              id="image_url"
+              name="image_url"
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" id="cancel-btn">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn--primary" id="save-btn">
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
