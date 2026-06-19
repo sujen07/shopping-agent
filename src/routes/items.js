@@ -1,5 +1,8 @@
 const express = require('express');
 const db = require('../db');
+const { buildSearchQuery } = require('../services/searchQuery');
+const { searchWeb } = require('../services/tavily');
+const { structureSearchResults } = require('../services/lmStudio');
 
 const router = express.Router();
 
@@ -51,6 +54,35 @@ router.get('/', (req, res) => {
     .prepare('SELECT * FROM items ORDER BY created_at DESC')
     .all();
   res.json(items);
+});
+
+router.post('/:id/search', async (req, res) => {
+  const item = db
+    .prepare('SELECT * FROM items WHERE id = ?')
+    .get(req.params.id);
+
+  if (!item) {
+    return res.status(404).json({ error: 'Item not found' });
+  }
+
+  try {
+    const query = buildSearchQuery(item);
+    const rawResults = await searchWeb(query);
+    const results = await structureSearchResults(item, rawResults);
+    res.json({ results });
+  } catch (err) {
+    if (err.code === 'MISSING_CONFIG') {
+      return res.status(500).json({ error: err.message });
+    }
+    if (err.code === 'LM_STUDIO_UNAVAILABLE') {
+      return res.status(503).json({ error: err.message });
+    }
+    if (err.code === 'TAVILY_ERROR' || err.code === 'LM_STUDIO_ERROR') {
+      return res.status(502).json({ error: err.message });
+    }
+    console.error('Search error:', err);
+    res.status(500).json({ error: 'Search failed' });
+  }
 });
 
 router.get('/:id', (req, res) => {

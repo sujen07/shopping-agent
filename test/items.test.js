@@ -93,4 +93,12 @@ describe('items API', () => {
     assert.equal(res.status, 404);
     assert.equal(res.body.error, 'Not found');
   });
+
+  it('accepts a local uploads path in image_url', async () => {
+    const res = await request(app)
+      .post('/api/items')
+      .send({ title: 'Uploaded photo item', image_url: '/uploads/test.jpg' });
+    assert.equal(res.status, 201);
+    assert.equal(res.body.image_url, '/uploads/test.jpg');
+  });
 });
